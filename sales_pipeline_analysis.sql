@@ -178,4 +178,39 @@ ORDER BY win_rate DESC;
 -- 6. Opportunity mix analysis
 -- Assess whether rep exposure to different company segments explains performance differences
 --------------------------------------------------
+SELECT 
+	sp.sales_agent,
+	COUNT(*) AS number_closed,
+	ROUND(
+		SUM(CASE WHEN ac.employees BETWEEN 0 AND 1179 THEN 1 ELSE 0 END) * 100.0
+		/ COUNT(*)
+	,2) AS pct_small_mid,
+	ROUND(
+		SUM(CASE WHEN ac.employees BETWEEN 1180 AND 2769 THEN 1 ELSE 0 END) * 100.0
+		/ COUNT(*)
+	,2) AS pct_mid,
+	ROUND(
+		SUM(CASE WHEN ac.employees BETWEEN 2770 AND 5595 THEN 1 ELSE 0 END) * 100.0
+		/ COUNT(*)
+	,2) AS pct_upper_mid,
+	ROUND(
+		SUM(CASE WHEN ac.employees > 5595 THEN 1 ELSE 0 END) * 100.0
+		/ COUNT(*)
+	,2) AS pct_enterprise,
+	ROUND(
+		SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
+		/ COUNT(*)
+	,2) AS win_rate
+FROM sales_pipeline AS sp
+INNER JOIN accounts AS ac
+	ON ac.account = sp.account
+WHERE sp.deal_stage IN ('Won','Lost')
+GROUP BY sp.sales_agent
+ORDER BY pct_mid DESC;
+
+--------------------------------------------------
+-- 7. Revenue impact analysis
+-- Combine win rate and deal size to estimate expected revenue per opportunity
+--------------------------------------------------
+
 
