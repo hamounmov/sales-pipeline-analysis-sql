@@ -153,6 +153,8 @@ SELECT
 	PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY employees ASC) AS percentile_75
 FROM accounts;
 
+-- Used to define company-size buckets based on the employee distribution
+
 
 -- using these results, I will get the win rate by company segment
 	
@@ -235,11 +237,11 @@ SELECT
 		AVG(close_value)
 		* (SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 1.0
 		/ COUNT(*))
-	,2) AS expected_revenue
+	,2) AS exp_revenue_per_opp
 FROM sales_pipeline
 WHERE deal_stage IN ('Won','Lost')
 GROUP BY sales_agent
-ORDER BY expected_revenue DESC;
+ORDER BY exp_revenue_per_opp DESC;
 
 -- Question: How does performance change when conversion is evaluated alongside deal value?
 -- Why it matters: Win rate alone may understate the contribution of reps working on larger opportunities.
