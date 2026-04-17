@@ -1,6 +1,11 @@
 /*
 Sales Pipeline Analysis
 Objective: identify what drives uneven pipeline conversion and revenue predictability
+
+Tables used:
+- sales_pipeline
+- accounts
+- sales_teams
 */
 
 --------------------------------------------------
@@ -64,15 +69,15 @@ GROUP BY product;
 
 SELECT
 	ac.sector,
- 	COUNT(*) AS sp.total_closed,
+ 	COUNT(*) AS total_closed,
 	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) AS total_won,
 	ROUND(
     	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
   		/ COUNT(*)
   	,2) AS win_rate
 FROM sales_pipeline sp
-LEFT JOIN accounts ac
-ON sp.account=ac.account
+INNER JOIN accounts ac
+	ON sp.account=ac.account
 WHERE sp.deal_stage IN ('Won','Lost')
 GROUP BY ac.sector
 ORDER BY win_rate DESC;
@@ -96,7 +101,7 @@ SELECT
     	/ COUNT(*)
   	,2) AS win_rate
 FROM sales_pipeline
-WHERE sp.deal_stage IN ('Won','Lost')
+WHERE deal_stage IN ('Won','Lost')
 GROUP BY sales_agent
 ORDER BY win_rate DESC;
 
@@ -114,7 +119,7 @@ FROM sales_pipeline sp
 LEFT JOIN sales_teams st
 	ON sp.sales_agent = st.sales_agent
 WHERE sp.deal_stage IN ('Won','Lost')
-GROUP BY st.manager
+GROUP BY st.manager;
 
 	
 -- win rate by regional office
@@ -130,7 +135,7 @@ FROM sales_pipeline sp
 LEFT JOIN sales_teams st
 	ON sp.sales_agent = st.sales_agent
 WHERE sp.deal_stage IN ('Won','Lost')
-GROUP BY st.regional_office
+GROUP BY st.regional_office;
 
 -- Question:
 -- Why it matters:
@@ -164,9 +169,9 @@ SELECT
 		SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
 		/ COUNT(*)
 	,2) AS win_rate
-FROM accounts AS ac
-INNER JOIN sales_pipeline AS sp
-ON ac.account = sp.account
+FROM accounts ac
+INNER JOIN sales_pipeline sp
+	ON ac.account = sp.account
 WHERE sp.deal_stage IN ('Won','Lost')
 GROUP BY company_segment
 ORDER BY win_rate DESC;
@@ -180,7 +185,7 @@ ORDER BY win_rate DESC;
 --------------------------------------------------
 SELECT 
 	sp.sales_agent,
-	COUNT(*) AS number_closed,
+	COUNT(*) AS total_closed,
 	ROUND(
 		SUM(CASE WHEN ac.employees BETWEEN 0 AND 1179 THEN 1 ELSE 0 END) * 100.0
 		/ COUNT(*)
@@ -201,16 +206,39 @@ SELECT
 		SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
 		/ COUNT(*)
 	,2) AS win_rate
-FROM sales_pipeline AS sp
-INNER JOIN accounts AS ac
+FROM sales_pipeline sp
+INNER JOIN accounts ac
 	ON ac.account = sp.account
 WHERE sp.deal_stage IN ('Won','Lost')
 GROUP BY sp.sales_agent
 ORDER BY pct_mid DESC;
 
+-- Question:
+-- Why it matters:
+
 --------------------------------------------------
 -- 7. Revenue impact analysis
 -- Combine win rate and deal size to estimate expected revenue per opportunity
 --------------------------------------------------
+
+SELECT 
+	sales_agent,
+	COUNT(*) AS total_closed,
+	ROUND(
+		SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
+		/ COUNT(*)
+	,2) AS win_rate,
+	ROUND(
+		AVG(close_value)
+	,0) AS avg_close_value,
+	ROUND(
+		AVG(close_value)
+		* (SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 1.0
+		/ COUNT(*))
+	,2) AS expected_revenue
+FROM sales_pipeline
+WHERE deal_stage IN ('Won','Lost')
+GROUP BY sales_agent
+ORDER BY expected_revenue DESC;
 
 
