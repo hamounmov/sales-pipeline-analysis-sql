@@ -82,8 +82,8 @@ WHERE sp.deal_stage IN ('Won','Lost')
 GROUP BY ac.sector
 ORDER BY win_rate DESC;
 
--- Question:
--- Why it matters:
+-- Question: Does sector explain differences in closed win rate?
+-- Why it matters: If sector-level variation is small, industry mix is unlikely to be a major driver of uneven conversion.
 
 --------------------------------------------------
 -- 4. Sales hierarchy analysis
@@ -137,8 +137,8 @@ LEFT JOIN sales_teams st
 WHERE sp.deal_stage IN ('Won','Lost')
 GROUP BY st.regional_office;
 
--- Question:
--- Why it matters:
+-- Question: Is performance variation mainly driven by rep, manager, or region?
+-- Why it matters: This helps determine whether conversion differences are primarily individual or structural.
 	
 --------------------------------------------------
 -- 5. Company size analysis
@@ -176,8 +176,8 @@ WHERE sp.deal_stage IN ('Won','Lost')
 GROUP BY company_segment
 ORDER BY win_rate DESC;
 
--- Question:
--- Why it matters:
+-- Question: Does company size affect conversion performance?
+-- Why it matters: If win rate varies by company segment, opportunity mix may help explain rep-level performance differences.
 
 --------------------------------------------------
 -- 6. Opportunity mix analysis
@@ -213,8 +213,8 @@ WHERE sp.deal_stage IN ('Won','Lost')
 GROUP BY sp.sales_agent
 ORDER BY pct_mid DESC;
 
--- Question:
--- Why it matters:
+-- Question: Are lower-performing reps disproportionately exposed to weaker-converting company segments?
+-- Why it matters: This tests whether rep-level variation reflects execution, account mix, or both.
 
 --------------------------------------------------
 -- 7. Revenue impact analysis
@@ -241,4 +241,5 @@ WHERE deal_stage IN ('Won','Lost')
 GROUP BY sales_agent
 ORDER BY expected_revenue DESC;
 
-
+-- Question: How does performance change when conversion is evaluated alongside deal value?
+-- Why it matters: Win rate alone may understate the contribution of reps working on larger opportunities.
