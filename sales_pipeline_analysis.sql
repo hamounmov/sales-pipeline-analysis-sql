@@ -19,8 +19,9 @@ SELECT
 	COUNT(*) AS total_deals,
     SUM(CASE WHEN deal_stage IN ('Won', 'Lost') THEN 1 ELSE 0 END) AS total_closed_deals,
     SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) AS won_deals,
-    SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0 /
-    SUM(CASE WHEN deal_stage IN ('Won', 'Lost') THEN 1 ELSE 0 END) AS win_rate
+	AVG(CASE WHEN deal_stage = 'Won' THEN 1
+   			WHEN deal_stage = 'Lost' THEN 0
+	END) * 100 AS win_rate
 FROM sales_pipeline;
 
 
@@ -39,9 +40,6 @@ SELECT
 FROM sales_pipeline
 WHERE deal_stage IN ('Won','Lost');
 
--- Question:
--- Why it matters:
-
 --------------------------------------------------
 -- 2. Product analysis
 -- Test whether closed win rate varies meaningfully by product
@@ -51,9 +49,8 @@ SELECT
 	product,
 	SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) AS total_won,
 	COUNT(*) AS total_closed,
-	ROUND(
-		SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
-		/ COUNT(*)
+	ROUND
+		(AVG(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
 	,2) AS win_rate
 FROM sales_pipeline
 WHERE deal_stage IN ('Won','Lost')
@@ -72,8 +69,7 @@ SELECT
  	COUNT(*) AS total_closed,
 	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) AS total_won,
 	ROUND(
-    	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
-  		/ COUNT(*)
+    	AVG(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
   	,2) AS win_rate
 FROM sales_pipeline sp
 INNER JOIN accounts ac
@@ -97,8 +93,7 @@ SELECT
 	COUNT(*) AS total_closed,
   	SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) AS total_won,
   	ROUND(
-    	SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
-    	/ COUNT(*)
+    	AVG(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
   	,2) AS win_rate
 FROM sales_pipeline
 WHERE deal_stage IN ('Won','Lost')
@@ -112,8 +107,7 @@ SELECT
   	COUNT(*) AS total_closed,
   	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) AS total_won,
   	ROUND(
-    	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
-    	/ COUNT(*)
+    	AVG(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
   	,2) AS win_rate
 FROM sales_pipeline sp
 LEFT JOIN sales_teams st
@@ -128,8 +122,7 @@ SELECT
   	COUNT(*) AS total_closed,
   	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) AS total_won,
   	ROUND(
-    	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
-    	/ COUNT(*)
+    	AVG(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
   	,2) AS win_rate
 FROM sales_pipeline sp
 LEFT JOIN sales_teams st
@@ -168,8 +161,7 @@ SELECT
 	SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) AS total_won,
 	COUNT(*) AS total_closed,
 	ROUND(
-		SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
-		/ COUNT(*)
+		AVG(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
 	,2) AS win_rate
 FROM accounts ac
 INNER JOIN sales_pipeline sp
@@ -189,24 +181,19 @@ SELECT
 	sp.sales_agent,
 	COUNT(*) AS total_closed,
 	ROUND(
-		SUM(CASE WHEN ac.employees BETWEEN 0 AND 1179 THEN 1 ELSE 0 END) * 100.0
-		/ COUNT(*)
+		AVG(CASE WHEN ac.employees BETWEEN 0 AND 1179 THEN 1 ELSE 0 END) * 100.0
 	,2) AS pct_small_mid,
 	ROUND(
-		SUM(CASE WHEN ac.employees BETWEEN 1180 AND 2769 THEN 1 ELSE 0 END) * 100.0
-		/ COUNT(*)
+		AVG(CASE WHEN ac.employees BETWEEN 1180 AND 2769 THEN 1 ELSE 0 END) * 100.0
 	,2) AS pct_mid,
 	ROUND(
-		SUM(CASE WHEN ac.employees BETWEEN 2770 AND 5595 THEN 1 ELSE 0 END) * 100.0
-		/ COUNT(*)
+		AVG(CASE WHEN ac.employees BETWEEN 2770 AND 5595 THEN 1 ELSE 0 END) * 100.0
 	,2) AS pct_upper_mid,
 	ROUND(
-		SUM(CASE WHEN ac.employees > 5595 THEN 1 ELSE 0 END) * 100.0
-		/ COUNT(*)
+		AVG(CASE WHEN ac.employees > 5595 THEN 1 ELSE 0 END) * 100.0
 	,2) AS pct_enterprise,
 	ROUND(
-		SUM(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
-		/ COUNT(*)
+		AVG(CASE WHEN sp.deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
 	,2) AS win_rate
 FROM sales_pipeline sp
 INNER JOIN accounts ac
@@ -227,16 +214,14 @@ SELECT
 	sales_agent,
 	COUNT(*) AS total_closed,
 	ROUND(
-		SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
-		/ COUNT(*)
+		AVG(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 100.0
 	,2) AS win_rate,
 	ROUND(
 		AVG(close_value)
 	,0) AS avg_close_value,
 	ROUND(
 		AVG(close_value)
-		* (SUM(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 1.0
-		/ COUNT(*))
+		* (AVG(CASE WHEN deal_stage = 'Won' THEN 1 ELSE 0 END) * 1.0)
 	,2) AS exp_revenue_per_opp
 FROM sales_pipeline
 WHERE deal_stage IN ('Won','Lost')
